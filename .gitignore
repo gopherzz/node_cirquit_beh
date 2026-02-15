@@ -1,33 +1,26 @@
-```gitignore
-# Python compiled files
+```
+# Python
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
-# Audio files (build artifacts)
+# Audio files (if they are build artifacts)
 *.wav
 
-# Logs and temp files
+# Dependencies
+.venv/
+venv/
+env/
+
+# Logs
 *.log
-*.tmp
 
-# Environment files
-.env
-.env.local
-*.env.*
+# OS generated files
+.DS_Store
+Thumbs.db
 
-# Editors
+# IDE
 .vscode/
 .idea/
-
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# MyPy cache
-.mypy_cache/
-
-# Pytest cache
-.pytest_cache/
 ```

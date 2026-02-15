@@ -121,7 +121,7 @@ def example_1_basic_synth():
     
     # Save stereo audio
     audio_stereo = np.column_stack((audio_left, audio_right))
-    wavfile.write('/home/claude/node_example1_basic_synth.wav', sample_rate,
+    wavfile.write('/workspace/node_example1_basic_synth.wav', sample_rate,
                   (audio_stereo * 32767).astype(np.int16))
     
     print("✓ Saved node_example1_basic_synth.wav")
@@ -234,7 +234,7 @@ def example_2_detuned_synth():
     audio_right = audio_right / np.max(np.abs(audio_right)) * 0.8
     
     audio_stereo = np.column_stack((audio_left, audio_right))
-    wavfile.write('/home/claude/node_example2_detuned.wav', sample_rate,
+    wavfile.write('/workspace/node_example2_detuned.wav', sample_rate,
                   (audio_stereo * 32767).astype(np.int16))
     
     print("✓ Saved node_example2_detuned.wav")
@@ -333,7 +333,7 @@ def example_3_lfo_filter():
     audio_right = audio_right / np.max(np.abs(audio_right)) * 0.8
     
     audio_stereo = np.column_stack((audio_left, audio_right))
-    wavfile.write('/home/claude/node_example3_lfo.wav', sample_rate,
+    wavfile.write('/workspace/node_example3_lfo.wav', sample_rate,
                   (audio_stereo * 32767).astype(np.int16))
     
     print("✓ Saved node_example3_lfo.wav")
