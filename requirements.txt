@@ -1,0 +1,22 @@
+# Analog Circuit Synthesis Framework - Requirements
+
+# Core numerical computing
+numpy>=1.20.0
+
+# Audio file I/O
+scipy>=1.7.0
+
+# Visualization (for examples)
+matplotlib>=3.3.0
+
+# Optional: For real-time audio
+# sounddevice>=0.4.0
+# pyaudio>=0.2.11
+
+# Optional: For MIDI support
+# mido>=1.2.0
+# python-rtmidi>=1.4.0
+
+# Optional: Performance optimization
+# numba>=0.53.0
+# cython>=0.29.0

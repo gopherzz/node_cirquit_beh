@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analog Circuit Node Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Left Panel - Node Library */
+        .node-library {
+            width: 280px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-right: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .node-library h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #6dd5ed;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .node-category {
+            margin-bottom: 25px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            color: #a8d8ea;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .node-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            margin: 5px 0;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .node-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .node-button:active {
+            transform: translateY(0);
+        }
+
+        /* Canvas Area */
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: grab;
+        }
+
+        canvas:active {
+            cursor: grabbing;
+        }
+
+        /* Right Panel - Properties */
+        .properties-panel {
+            width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .properties-panel h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #6dd5ed;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .property-group {
+            margin-bottom: 20px;
+        }
+
+        .property-label {
+            font-size: 13px;
+            color: #a8d8ea;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .property-input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 13px;
+        }
+
+        .property-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        select.property-input {
+            cursor: pointer;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            position: absolute;
+            top: 20px;
+            left: 300px;
+            right: 320px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .toolbar h1 {
+            font-size: 20px;
+            color: #6dd5ed;
+        }
+
+        .toolbar-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .toolbar-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .toolbar-button.danger {
+            background: linear-gradient(135deg, #f857a6 0%, #ff5858 100%);
+        }
+
+        .toolbar-button.success {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e063 100%);
+        }
+
+        /* Info Box */
+        .info-box {
+            position: absolute;
+            bottom: 20px;
+            left: 300px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 15px 20px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #a8d8ea;
+            max-width: 400px;
+            z-index: 100;
+        }
+
+        .info-box strong {
+            color: #6dd5ed;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Node Selection Indicator */
+        .selected-node-name {
+            color: #6dd5ed;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(109, 213, 237, 0.3);
+        }
+
+        .no-selection {
+            color: #888;
+            font-style: italic;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        /* Range Input Styling */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.5);
+            border: none;
+        }
+
+        .value-display {
+            display: inline-block;
+            float: right;
+            color: #6dd5ed;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel: Node Library -->
+        <div class="node-library">
+            <h2>📦 Node Library</h2>
+            
+            <div class="node-category">
+                <div class="category-title">🎵 Oscillators</div>
+                <button class="node-button" onclick="addNode('OscillatorNode')">VCO</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">🔊 Filters</div>
+                <button class="node-button" onclick="addNode('MoogFilterNode')">Moog Filter</button>
+                <button class="node-button" onclick="addNode('StateVariableFilterNode')">SVF Filter</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">📈 Envelopes</div>
+                <button class="node-button" onclick="addNode('ADSRNode')">ADSR</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">🌊 Modulators</div>
+                <button class="node-button" onclick="addNode('LFONode')">LFO</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">🔧 Utility</div>
+                <button class="node-button" onclick="addNode('MixerNode')">Mixer</button>
+                <button class="node-button" onclick="addNode('GainNode')">Gain</button>
+                <button class="node-button" onclick="addNode('VCANode')">VCA</button>
+                <button class="node-button" onclick="addNode('ConstantNode')">Constant</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">🎹 I/O</div>
+                <button class="node-button" onclick="addNode('MIDINoteNode')">MIDI Note</button>
+                <button class="node-button" onclick="addNode('AudioOutputNode')">Audio Out</button>
+            </div>
+
+            <div class="node-category">
+                <div class="category-title">🐛 Debug</div>
+                <button class="node-button" onclick="addNode('ScopeNode')">Scope</button>
+            </div>
+        </div>
+
+        <!-- Center: Canvas -->
+        <div class="canvas-area">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <h1>🎛️ Node Editor</h1>
+                    <button class="toolbar-button success" onclick="renderPatch()">▶️ Render</button>
+                    <button class="toolbar-button" onclick="savePatch()">💾 Save</button>
+                    <button class="toolbar-button danger" onclick="clearPatch()">🗑️ Clear</button>
+                </div>
+                <div class="toolbar-right">
+                    <span style="font-size: 12px;">Nodes: <span id="nodeCount">0</span></span>
+                </div>
+            </div>
+            
+            <canvas id="canvas"></canvas>
+
+            <div class="info-box">
+                <strong>Controls:</strong><br>
+                • Drag nodes to move<br>
+                • Click port circles to connect<br>
+                • Right-click node to delete<br>
+                • Click node to edit properties
+            </div>
+        </div>
+
+        <!-- Right Panel: Properties -->
+        <div class="properties-panel">
+            <h2>⚙️ Properties</h2>
+            <div id="propertiesContent">
+                <div class="no-selection">
+                    Select a node to edit its properties
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Node Editor Implementation
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // State
+        let nodes = [];
+        let connections = [];
+        let selectedNode = null;
+        let draggingNode = null;
+        let connectingFrom = null;
+        let mousePos = { x: 0, y: 0 };
+        let offset = { x: 0, y: 0 };
+        let panOffset = { x: 0, y: 0 };
+
+        // Constants
+        const NODE_WIDTH = 180;
+        const NODE_HEIGHT = 120;
+        const PORT_RADIUS = 8;
+
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            draw();
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Node templates
+        const nodeTemplates = {
+            OscillatorNode: {
+                name: 'VCO',
+                color: '#FF6B9D',
+                inputs: ['frequency', 'fm_mod', 'pwm_mod'],
+                outputs: ['output'],
+                params: {
+                    waveform: { type: 'select', options: ['saw', 'square', 'triangle', 'sine'], default: 'saw' },
+                    frequency: { type: 'number', min: 20, max: 20000, default: 440 },
+                }
+            },
+            MoogFilterNode: {
+                name: 'Moog Filter',
+                color: '#95E1D3',
+                inputs: ['input', 'cutoff_mod', 'resonance_mod'],
+                outputs: ['output'],
+                params: {
+                    cutoff: { type: 'number', min: 20, max: 20000, default: 1000 },
+                    resonance: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.5 },
+                    drive: { type: 'range', min: 1, max: 10, step: 0.1, default: 1 },
+                }
+            },
+            ADSRNode: {
+                name: 'ADSR',
+                color: '#F38181',
+                inputs: ['gate'],
+                outputs: ['output'],
+                params: {
+                    attack: { type: 'range', min: 0.001, max: 2, step: 0.01, default: 0.01 },
+                    decay: { type: 'range', min: 0.001, max: 2, step: 0.01, default: 0.1 },
+                    sustain: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.7 },
+                    release: { type: 'range', min: 0.001, max: 5, step: 0.01, default: 0.3 },
+                }
+            },
+            LFONode: {
+                name: 'LFO',
+                color: '#AA96DA',
+                inputs: ['rate_mod'],
+                outputs: ['output'],
+                params: {
+                    frequency: { type: 'range', min: 0.1, max: 20, step: 0.1, default: 1 },
+                    waveform: { type: 'select', options: ['sine', 'triangle', 'saw', 'square', 'random'], default: 'sine' },
+                    amplitude: { type: 'range', min: 0, max: 1, step: 0.01, default: 1 },
+                }
+            },
+            MixerNode: {
+                name: 'Mixer',
+                color: '#FFD93D',
+                inputs: ['input_1', 'input_2', 'input_3', 'input_4'],
+                outputs: ['output'],
+                params: {
+                    level_1: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.25 },
+                    level_2: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.25 },
+                    level_3: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.25 },
+                    level_4: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.25 },
+                }
+            },
+            MIDINoteNode: {
+                name: 'MIDI Note',
+                color: '#6C5CE7',
+                inputs: [],
+                outputs: ['frequency', 'gate', 'velocity'],
+                params: {
+                    note: { type: 'number', min: 0, max: 127, default: 60 },
+                    gate_on: { type: 'checkbox', default: false },
+                    velocity: { type: 'range', min: 0, max: 1, step: 0.01, default: 1 },
+                }
+            },
+            AudioOutputNode: {
+                name: 'Audio Out',
+                color: '#00D2FF',
+                inputs: ['left', 'right'],
+                outputs: [],
+                params: {
+                    volume: { type: 'range', min: 0, max: 2, step: 0.01, default: 1 },
+                }
+            },
+            GainNode: {
+                name: 'Gain',
+                color: '#74B9FF',
+                inputs: ['input', 'gain_mod'],
+                outputs: ['output'],
+                params: {
+                    gain_db: { type: 'range', min: -60, max: 24, step: 1, default: 0 },
+                }
+            },
+            VCANode: {
+                name: 'VCA',
+                color: '#A29BFE',
+                inputs: ['input', 'control'],
+                outputs: ['output'],
+                params: {}
+            },
+            ConstantNode: {
+                name: 'Constant',
+                color: '#FDCB6E',
+                inputs: [],
+                outputs: ['output'],
+                params: {
+                    value: { type: 'number', min: -10, max: 10, default: 0 },
+                }
+            },
+            StateVariableFilterNode: {
+                name: 'SVF Filter',
+                color: '#55EFC4',
+                inputs: ['input', 'cutoff_mod'],
+                outputs: ['output'],
+                params: {
+                    cutoff: { type: 'number', min: 20, max: 20000, default: 1000 },
+                    resonance: { type: 'range', min: 0, max: 1, step: 0.01, default: 0.5 },
+                    mode: { type: 'select', options: ['lowpass', 'highpass', 'bandpass', 'notch'], default: 'lowpass' },
+                }
+            },
+            ScopeNode: {
+                name: 'Scope',
+                color: '#00B894',
+                inputs: ['input'],
+                outputs: ['output'],
+                params: {}
+            }
+        };
+
+        // Add node
+        function addNode(type) {
+            const template = nodeTemplates[type];
+            if (!template) return;
+
+            const node = {
+                id: Date.now().toString(),
+                type: type,
+                name: template.name,
+                x: canvas.width / 2 - NODE_WIDTH / 2 + Math.random() * 100 - 50,
+                y: canvas.height / 2 - NODE_HEIGHT / 2 + Math.random() * 100 - 50,
+                color: template.color,
+                inputs: template.inputs,
+                outputs: template.outputs,
+                params: {}
+            };
+
+            // Initialize parameters with defaults
+            for (const [key, config] of Object.entries(template.params)) {
+                node.params[key] = config.default;
+            }
+
+            nodes.push(node);
+            updateNodeCount();
+            draw();
+        }
+
+        // Draw everything
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw grid
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            const gridSize = 40;
+            for (let x = 0; x < canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw connections
+            connections.forEach(conn => {
+                const fromNode = nodes.find(n => n.id === conn.from.nodeId);
+                const toNode = nodes.find(n => n.id === conn.to.nodeId);
+                if (!fromNode || !toNode) return;
+
+                const fromPort = getPortPosition(fromNode, conn.from.port, false);
+                const toPort = getPortPosition(toNode, conn.to.port, true);
+
+                drawConnection(fromPort.x, fromPort.y, toPort.x, toPort.y, '#6dd5ed');
+            });
+
+            // Draw connecting line
+            if (connectingFrom) {
+                const fromPos = getPortPosition(connectingFrom.node, connectingFrom.port, false);
+                drawConnection(fromPos.x, fromPos.y, mousePos.x, mousePos.y, '#fff', true);
+            }
+
+            // Draw nodes
+            nodes.forEach(node => {
+                drawNode(node, node === selectedNode);
+            });
+        }
+
+        function drawNode(node, selected) {
+            const x = node.x;
+            const y = node.y;
+
+            // Shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = selected ? 20 : 10;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+
+            // Node body
+            ctx.fillStyle = node.color;
+            ctx.beginPath();
+            ctx.roundRect(x, y, NODE_WIDTH, NODE_HEIGHT, 12);
+            ctx.fill();
+
+            ctx.shadowColor = 'transparent';
+
+            // Selection border
+            if (selected) {
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+            }
+
+            // Node header
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.roundRect(x, y, NODE_WIDTH, 35, [12, 12, 0, 0]);
+            ctx.fill();
+
+            // Node name
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 14px "Segoe UI"';
+            ctx.textAlign = 'center';
+            ctx.fillText(node.name, x + NODE_WIDTH / 2, y + 22);
+
+            // Input ports
+            node.inputs.forEach((port, i) => {
+                const py = y + 50 + i * 25;
+                drawPort(x, py, true, port);
+            });
+
+            // Output ports
+            node.outputs.forEach((port, i) => {
+                const py = y + 50 + i * 25;
+                drawPort(x + NODE_WIDTH, py, false, port);
+            });
+        }
+
+        function drawPort(x, y, isInput, label) {
+            // Port circle
+            ctx.fillStyle = isInput ? '#4ECDC4' : '#FF6B9D';
+            ctx.beginPath();
+            ctx.arc(x, y, PORT_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Label
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = '11px "Segoe UI"';
+            ctx.textAlign = isInput ? 'left' : 'right';
+            const labelX = isInput ? x + 15 : x - 15;
+            ctx.fillText(label, labelX, y + 4);
+        }
+
+        function drawConnection(x1, y1, x2, y2, color, dashed = false) {
+            const controlPointOffset = Math.abs(x2 - x1) * 0.5;
+            
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            if (dashed) {
+                ctx.setLineDash([5, 5]);
+            } else {
+                ctx.setLineDash([]);
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.bezierCurveTo(
+                x1 + controlPointOffset, y1,
+                x2 - controlPointOffset, y2,
+                x2, y2
+            );
+            ctx.stroke();
+
+            ctx.setLineDash([]);
+        }
+
+        function getPortPosition(node, portName, isInput) {
+            const ports = isInput ? node.inputs : node.outputs;
+            const index = ports.indexOf(portName);
+            const x = isInput ? node.x : node.x + NODE_WIDTH;
+            const y = node.y + 50 + index * 25;
+            return { x, y };
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            mousePos = { x, y };
+
+            // Check for port click
+            for (const node of nodes) {
+                // Check output ports
+                for (let i = 0; i < node.outputs.length; i++) {
+                    const portPos = getPortPosition(node, node.outputs[i], false);
+                    const dist = Math.hypot(x - portPos.x, y - portPos.y);
+                    if (dist < PORT_RADIUS + 5) {
+                        connectingFrom = { node, port: node.outputs[i], isInput: false };
+                        return;
+                    }
+                }
+
+                // Check input ports
+                for (let i = 0; i < node.inputs.length; i++) {
+                    const portPos = getPortPosition(node, node.inputs[i], true);
+                    const dist = Math.hypot(x - portPos.x, y - portPos.y);
+                    if (dist < PORT_RADIUS + 5) {
+                        if (connectingFrom && !connectingFrom.isInput) {
+                            // Complete connection
+                            connections.push({
+                                from: { nodeId: connectingFrom.node.id, port: connectingFrom.port },
+                                to: { nodeId: node.id, port: node.inputs[i] }
+                            });
+                            connectingFrom = null;
+                            draw();
+                        }
+                        return;
+                    }
+                }
+            }
+
+            // Check for node click
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                const node = nodes[i];
+                if (x >= node.x && x <= node.x + NODE_WIDTH &&
+                    y >= node.y && y <= node.y + NODE_HEIGHT) {
+                    
+                    if (e.button === 0) { // Left click
+                        draggingNode = node;
+                        selectedNode = node;
+                        offset = { x: x - node.x, y: y - node.y };
+                        updateProperties();
+                    }
+                    draw();
+                    return;
+                }
+            }
+
+            // Click on empty space
+            selectedNode = null;
+            connectingFrom = null;
+            updateProperties();
+            draw();
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mousePos = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+
+            if (draggingNode) {
+                draggingNode.x = mousePos.x - offset.x;
+                draggingNode.y = mousePos.y - offset.y;
+                draw();
+            } else if (connectingFrom) {
+                draw();
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            draggingNode = null;
+        });
+
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if right-clicking on a node
+            for (let i = nodes.length - 1; i >= 0; i--) {
+                const node = nodes[i];
+                if (x >= node.x && x <= node.x + NODE_WIDTH &&
+                    y >= node.y && y <= node.y + NODE_HEIGHT) {
+                    
+                    // Delete node
+                    nodes.splice(i, 1);
+                    
+                    // Remove connections
+                    connections = connections.filter(conn => 
+                        conn.from.nodeId !== node.id && conn.to.nodeId !== node.id
+                    );
+                    
+                    if (selectedNode === node) {
+                        selectedNode = null;
+                        updateProperties();
+                    }
+                    
+                    updateNodeCount();
+                    draw();
+                    return;
+                }
+            }
+        });
+
+        // Update properties panel
+        function updateProperties() {
+            const panel = document.getElementById('propertiesContent');
+            
+            if (!selectedNode) {
+                panel.innerHTML = '<div class="no-selection">Select a node to edit its properties</div>';
+                return;
+            }
+
+            const template = nodeTemplates[selectedNode.type];
+            let html = `<div class="selected-node-name">${selectedNode.name}</div>`;
+
+            for (const [key, config] of Object.entries(template.params)) {
+                html += `<div class="property-group">`;
+                html += `<label class="property-label">${key}`;
+                
+                if (config.type === 'range') {
+                    html += `<span class="value-display" id="value_${key}">${selectedNode.params[key].toFixed(2)}</span>`;
+                }
+                
+                html += `</label>`;
+
+                if (config.type === 'select') {
+                    html += `<select class="property-input" onchange="updateParam('${key}', this.value)">`;
+                    config.options.forEach(opt => {
+                        const selected = selectedNode.params[key] === opt ? 'selected' : '';
+                        html += `<option value="${opt}" ${selected}>${opt}</option>`;
+                    });
+                    html += `</select>`;
+                } else if (config.type === 'range') {
+                    html += `<input type="range" class="property-input" 
+                        min="${config.min}" max="${config.max}" step="${config.step || 0.01}"
+                        value="${selectedNode.params[key]}"
+                        oninput="updateParam('${key}', parseFloat(this.value))">`;
+                } else if (config.type === 'number') {
+                    html += `<input type="number" class="property-input" 
+                        min="${config.min}" max="${config.max}"
+                        value="${selectedNode.params[key]}"
+                        onchange="updateParam('${key}', parseFloat(this.value))">`;
+                } else if (config.type === 'checkbox') {
+                    const checked = selectedNode.params[key] ? 'checked' : '';
+                    html += `<input type="checkbox" ${checked}
+                        onchange="updateParam('${key}', this.checked)">`;
+                }
+
+                html += `</div>`;
+            }
+
+            panel.innerHTML = html;
+        }
+
+        function updateParam(key, value) {
+            if (selectedNode) {
+                selectedNode.params[key] = value;
+                
+                // Update value display for ranges
+                const display = document.getElementById(`value_${key}`);
+                if (display) {
+                    display.textContent = value.toFixed(2);
+                }
+            }
+        }
+
+        function updateNodeCount() {
+            document.getElementById('nodeCount').textContent = nodes.length;
+        }
+
+        function clearPatch() {
+            if (confirm('Clear all nodes and connections?')) {
+                nodes = [];
+                connections = [];
+                selectedNode = null;
+                updateNodeCount();
+                updateProperties();
+                draw();
+            }
+        }
+
+        function savePatch() {
+            const patch = {
+                nodes: nodes.map(n => ({
+                    id: n.id,
+                    type: n.type,
+                    x: n.x,
+                    y: n.y,
+                    params: n.params
+                })),
+                connections: connections
+            };
+
+            const blob = new Blob([JSON.stringify(patch, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'analog_patch.json';
+            a.click();
+        }
+
+        function renderPatch() {
+            alert('Patch rendering would process all nodes and generate audio.\n\nIn a full implementation, this would:\n1. Topologically sort nodes\n2. Process each node in order\n3. Route signals between nodes\n4. Output final audio to AudioOutputNode\n\nSee the Python backend for the actual synthesis engine!');
+        }
+
+        // Initial draw
+        draw();
+    </script>
+</body>
+</html>
