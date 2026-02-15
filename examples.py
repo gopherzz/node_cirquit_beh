@@ -75,7 +75,7 @@ def example_1_basic_note():
     # Save to file
     try:
         from scipy.io import wavfile
-        wavfile.write('/home/claude/example1_basic_note.wav', sample_rate, 
+        wavfile.write('/workspace/example1_basic_note.wav', sample_rate, 
                      (audio * 32767).astype(np.int16))
         print("✓ Audio saved to example1_basic_note.wav")
     except ImportError:
@@ -161,7 +161,7 @@ def example_2_bass_line():
     # Save
     try:
         from scipy.io import wavfile
-        wavfile.write('/home/claude/example2_bass_line.wav', sample_rate,
+        wavfile.write('/workspace/example2_bass_line.wav', sample_rate,
                      (full_audio * 32767).astype(np.int16))
         print("✓ Bass line saved to example2_bass_line.wav")
     except ImportError:
@@ -236,7 +236,7 @@ def example_3_pad_sound():
     # Save
     try:
         from scipy.io import wavfile
-        wavfile.write('/home/claude/example3_pad_sound.wav', sample_rate,
+        wavfile.write('/workspace/example3_pad_sound.wav', sample_rate,
                      (mixed_audio * 32767).astype(np.int16))
         print("✓ Pad sound saved to example3_pad_sound.wav")
     except ImportError:
@@ -288,7 +288,7 @@ def example_4_filter_sweep():
     # Save
     try:
         from scipy.io import wavfile
-        wavfile.write('/home/claude/example4_filter_sweep.wav', sample_rate,
+        wavfile.write('/workspace/example4_filter_sweep.wav', sample_rate,
                      (filtered * 32767).astype(np.int16))
         print("✓ Filter sweep saved to example4_filter_sweep.wav")
     except ImportError:
@@ -308,7 +308,7 @@ def example_4_filter_sweep():
         plt.colorbar(label='Power [dB]')
         plt.ylim(0, 10000)
         plt.tight_layout()
-        plt.savefig('/home/claude/example4_spectrogram.png', dpi=150)
+        plt.savefig('/workspace/example4_spectrogram.png', dpi=150)
         print("✓ Spectrogram saved to example4_spectrogram.png")
         plt.close()
     except ImportError:
@@ -355,7 +355,7 @@ def example_5_presets():
     print("✓ Saved preset: Deep Bass")
     
     # Export presets
-    preset_manager.export_presets('/home/claude/synth_presets.json')
+    preset_manager.export_presets('/workspace/synth_presets.json')
     print("✓ Exported presets to synth_presets.json")
     
     # Load preset into new voice
@@ -370,7 +370,7 @@ def example_5_presets():
     try:
         from scipy.io import wavfile
         audio = audio / np.max(np.abs(audio))
-        wavfile.write('/home/claude/example5_preset_test.wav', sample_rate,
+        wavfile.write('/workspace/example5_preset_test.wav', sample_rate,
                      (audio * 32767).astype(np.int16))
         print("✓ Preset test saved to example5_preset_test.wav")
     except ImportError:
@@ -429,7 +429,7 @@ def example_6_waveform_comparison():
         plt.ylim(-60, 20)
     
     plt.tight_layout()
-    plt.savefig('/home/claude/example6_waveforms.png', dpi=150)
+    plt.savefig('/workspace/example6_waveforms.png', dpi=150)
     print("✓ Waveform comparison saved to example6_waveforms.png")
     plt.close()
 
@@ -492,7 +492,7 @@ def example_7_envelope_shapes():
         plt.ylim(-0.1, 1.1)
     
     plt.tight_layout()
-    plt.savefig('/home/claude/example7_envelopes.png', dpi=150)
+    plt.savefig('/workspace/example7_envelopes.png', dpi=150)
     print("✓ Envelope shapes saved to example7_envelopes.png")
     plt.close()
 

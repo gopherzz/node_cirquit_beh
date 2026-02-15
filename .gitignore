@@ -1,0 +1,26 @@
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Audio files (if they are build artifacts)
+*.wav
+
+# Dependencies
+.venv/
+venv/
+env/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+```
